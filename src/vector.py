@@ -42,21 +42,24 @@ class Vector:
         return self
 
     def __str__(self):
-        return '%f %f' % (self.x, self.y)
+        return '(%f %f)' % (self.x, self.y)
 
     def __repr__(self):
-        return '%f %f' % (self.x, self.y)
+        return '(%f %f)' % (self.x, self.y)
 
     def normalize(self):
         norm = self.norm
-        self._x /= norm
-        self._y /= norm
+        self.x /= norm
+        self.y /= norm
 
         return self
 
     @property
     def norm(self):
-        return sqrt(self._x**2 + self._y**2)
+        if self.x == 0 and self.y == 0:
+            return 0
+
+        return sqrt(self.x**2 + self.y**2)
 
     @property
     def heading(self):

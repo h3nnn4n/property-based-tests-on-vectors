@@ -1,8 +1,13 @@
 import pytest
 from vector import Vector
 from math import pi
-from hypothesis import given
+from hypothesis import given, assume, settings
+import math
+import numpy as np
 import hypothesis.strategies as st
+
+
+eps = 1e-8
 
 
 @given(x1=st.integers(), y1=st.integers(), x2=st.integers(), y2=st.integers())
@@ -15,6 +20,12 @@ def test_add(x1, y1, x2, y2):
     assert c.x == a.x + b.x
     assert c.y == a.y + b.y
 
+    assert a.x == x1
+    assert a.y == y1
+
+    assert b.x == x2
+    assert b.y == y2
+
 
 @given(x1=st.integers(), y1=st.integers(), x2=st.integers(), y2=st.integers())
 def test_sub(x1, y1, x2, y2):
@@ -26,7 +37,14 @@ def test_sub(x1, y1, x2, y2):
     assert c.x == a.x - b.x
     assert c.y == a.y - b.y
 
+    assert a.x == x1
+    assert a.y == y1
 
+    assert b.x == x2
+    assert b.y == y2
+
+
+# TODO
 @given(x1=st.integers(), y1=st.integers(), x2=st.integers(), y2=st.integers())
 def test_iadd(x1, y1, x2, y2):
     a = Vector(x1, y1)
@@ -38,7 +56,13 @@ def test_iadd(x1, y1, x2, y2):
     assert a.x == c.x + b.x
     assert a.y == c.y + b.y
 
+    a += Vector(1, 1)
 
+    # assert a.x > c.x
+    # assert a.y > c.x
+
+
+# TODO
 @given(x1=st.integers(), y1=st.integers(), x2=st.integers(), y2=st.integers())
 def test_isub(x1, y1, x2, y2):
     a = Vector(x1, y1)
@@ -50,32 +74,46 @@ def test_isub(x1, y1, x2, y2):
     assert a.x == c.x - b.x
     assert a.y == c.y - b.y
 
+    # a -= Vector(1, 1)
 
-def test_setter():
+    # assert a.x < c.x
+    # assert a.y < c.x
+
+
+@given(st.integers(), st.integers())
+def test_setter(x, y):
     a = Vector()
 
     assert a.x == 0
     assert a.y == 0
 
-    a.x = 1
+    a.x = x
 
-    assert a.x == 1
+    assert a.x == x
     assert a.y == 0
 
-    a.y = 1
+    a.y = y
 
-    assert a.x == 1
-    assert a.y == 1
+    assert a.x == x
+    assert a.y == y
 
+    a.x = 0
+    a.y = 0
 
-def test_mul():
-    a = Vector(1, 1)
-    a = a * 2
-
-    assert a.x == 2
-    assert a.y == 2
+    assert a.x == 0
+    assert a.y == 0
 
 
+@given(st.integers(), st.integers(), st.integers())
+def test_mul(x, y, z):
+    a = Vector(x, y)
+    a = a * z
+
+    assert a.x == x * z
+    assert a.y == y * z
+
+
+# TODO
 def test_imul():
     a = Vector(1, 1)
     a *= 10
@@ -84,51 +122,60 @@ def test_imul():
     assert a.y == 10
 
 
-def test_norm():
-    a = Vector(3, 4)
-    assert a.norm == 5
+@given(st.integers(), st.integers())
+def test_norm(x, y):
+    a = Vector(x, y)
+    norm = a.norm
 
-    a = Vector()
-    assert a.norm == 0
+    assert norm == math.sqrt(a.x**2 + a.y**2)
 
 
-def test_normalize():
-    a = Vector(3, 4)
+@given(st.integers(), st.integers())
+def test_normalize(x, y):
+    assume(x != 0)
+    assume(y != 0)
+
+    a = Vector(x, y)
     a.normalize()
 
-    assert a.norm == 1
+    assert abs(a.norm - 1) < eps
 
 
-def test_zero():
-    a = Vector(1, 1)
+@given(st.integers(), st.integers())
+def test_zero(x, y):
+    a = Vector(x, y)
     a.zero()
 
     assert a.x == 0
     assert a.y == 0
 
 
-def test_set_mag():
-    a = Vector(3, 4)
-    a.set_mag(2)
-    assert a.norm == 2
-    a.set_mag(5)
-    assert a.norm == 5
-    a.set_mag(1)
-    assert a.norm == 1
+@settings(max_examples=200)
+@given(st.integers(), st.integers(), st.lists(st.integers(min_value=1, max_value=50331648)))
+def test_set_mag(x, y, mags):
+    assume(x != 0)
+    assume(y != 0)
+    assume(mags)
+
+    a = Vector(x, y)
+
+    for mag in mags:
+        a.set_mag(mag)
+        assert abs(a.norm - abs(mag)) < eps
 
 
-def test_limit():
-    a = Vector(3, 4)
-    assert a.norm == 5
+@settings(max_examples=200)
+@given(st.integers(), st.integers(), st.lists(st.integers(min_value=0, max_value=50331648).filter(lambda x: x != 0)))
+def test_limit(x, y, limits):
+    assume(x != 0)
+    assume(y != 0)
+    assume(limits)
 
-    a.limit(10)
-    assert a.norm == 5
+    a = Vector(x, y)
 
-    a.limit(3)
-    assert a.norm == 3
-
-    a.limit(1)
-    assert a.norm == 1
+    for limit in limits:
+        a.limit(limit)
+        assert abs(a.norm - abs(limit)) < eps or a.norm < abs(limit)
 
 
 def test_from_angle():
