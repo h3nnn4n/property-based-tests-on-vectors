@@ -42,10 +42,10 @@ class Vector:
         return self
 
     def __str__(self):
-        return '(%f %f)' % (self.x, self.y)
+        return '(%12.6f %12.6f)' % (self.x, self.y)
 
     def __repr__(self):
-        return '(%f %f)' % (self.x, self.y)
+        return self.__str__()
 
     def normalize(self):
         norm = self.norm

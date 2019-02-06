@@ -233,6 +233,14 @@ def test_heading(x, y, length):
     assert abs(a.y - b.y) < eps
 
 
+@given(st.integers())
+def test_random(_):
+    a = Vector().random()
+
+    assert -1 <= a.x <= 1
+    assert -1 <= a.y <= 1
+
+
 # Utils
 
 def distance(x1, x2, y1, y2):
