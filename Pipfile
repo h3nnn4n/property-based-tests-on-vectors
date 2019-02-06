@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+dpcontracts = "*"
+hypothesis = "*"
+numpy = "*"
+pytest = "*"
+coverage = "*"
+pytest-cov = "*"
+pytest-xdist = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"
