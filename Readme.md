@@ -5,6 +5,10 @@ After watching [this](https://www.youtube.com/watch?v=MYucYon2-lk), [this](https
 
 To make things even more fun I am going to experiment with several implementations of the 2D vector lib.
 
+## How to run
+
+This repository uses [pipenv](https://pipenv.readthedocs.io). Just run `pipenv install` on the root of this repository and everything will be setup. Then `pipenv shell` and `pytest` on the `src` folder. You can also run it the old school style (install the packages globaly).
+
 ## What I learned
 
 1. Float arithmetic with fixed number of bits is weird.
