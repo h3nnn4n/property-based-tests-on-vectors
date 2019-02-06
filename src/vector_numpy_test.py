@@ -1,8 +1,13 @@
 import pytest
 from vector_numpy import VectorNumpy
 from math import pi
-from hypothesis import given
+from hypothesis import given, assume, settings
+import math
+import numpy as np
 import hypothesis.strategies as st
+
+
+eps = 1e-8
 
 
 @given(x1=st.integers(), y1=st.integers(), x2=st.integers(), y2=st.integers())
@@ -15,6 +20,12 @@ def test_add(x1, y1, x2, y2):
     assert c.x == a.x + b.x
     assert c.y == a.y + b.y
 
+    assert a.x == x1
+    assert a.y == y1
+
+    assert b.x == x2
+    assert b.y == y2
+
 
 @given(x1=st.integers(), y1=st.integers(), x2=st.integers(), y2=st.integers())
 def test_sub(x1, y1, x2, y2):
@@ -25,6 +36,12 @@ def test_sub(x1, y1, x2, y2):
 
     assert c.x == a.x - b.x
     assert c.y == a.y - b.y
+
+    assert a.x == x1
+    assert a.y == y1
+
+    assert b.x == x2
+    assert b.y == y2
 
 
 @given(x1=st.integers(), y1=st.integers(), x2=st.integers(), y2=st.integers())
@@ -38,6 +55,17 @@ def test_iadd(x1, y1, x2, y2):
     assert a.x == c.x + b.x
     assert a.y == c.y + b.y
 
+    if x1 != 0 and x2 != 0:
+        assert a.x != x2
+
+    if y1 != 0 and y2 != 0:
+        assert a.y != y2
+
+    a += VectorNumpy(1, 1)
+
+    assert a.x == c.x + b.x + 1
+    assert a.y == c.y + b.y + 1
+
 
 @given(x1=st.integers(), y1=st.integers(), x2=st.integers(), y2=st.integers())
 def test_isub(x1, y1, x2, y2):
@@ -50,130 +78,171 @@ def test_isub(x1, y1, x2, y2):
     assert a.x == c.x - b.x
     assert a.y == c.y - b.y
 
+    if x1 != 0 and x2 != 0:
+        assert a.x != x2
 
-def test_setter():
+    if y1 != 0 and y2 != 0:
+        assert a.y != y2
+
+    a -= VectorNumpy(1, 1)
+
+    assert a.x == c.x - b.x - 1
+    assert a.y == c.y - b.y - 1
+
+
+@given(st.integers(), st.integers())
+def test_setter(x, y):
     a = VectorNumpy()
 
     assert a.x == 0
     assert a.y == 0
 
-    a.x = 1
+    a.x = x
 
-    assert a.x == 1
+    assert a.x == x
     assert a.y == 0
 
-    a.y = 1
+    a.y = y
 
-    assert a.x == 1
-    assert a.y == 1
+    assert a.x == x
+    assert a.y == y
 
+    a.x = 0
+    a.y = 0
 
-def test_mul():
-    a = VectorNumpy(1, 1)
-    a = a * 2
-
-    assert a.x == 2
-    assert a.y == 2
+    assert a.x == 0
+    assert a.y == 0
 
 
-def test_imul():
-    a = VectorNumpy(1, 1)
-    a *= 10
+@given(st.integers(), st.integers(), st.integers())
+def test_mul(x, y, z):
+    a = VectorNumpy(x, y)
+    a = a * z
 
-    assert a.x == 10
-    assert a.y == 10
-
-
-def test_norm():
-    a = VectorNumpy(3, 4)
-    assert a.norm == 5
-
-    a = VectorNumpy()
-    assert a.norm == 0
+    assert a.x == x * z
+    assert a.y == y * z
 
 
-def test_normalize():
-    a = VectorNumpy(3, 4)
+@given(st.integers(), st.integers(), st.integers())
+def test_imul(x, y, z):
+    a = VectorNumpy(x, y)
+    a *= z
+
+    assert a.x == x * z
+    assert a.y == y * z
+
+
+@given(st.integers(), st.integers())
+def test_norm(x, y):
+    a = VectorNumpy(x, y)
+    norm = a.norm
+
+    assert norm == math.sqrt(a.x**2 + a.y**2)
+
+
+@given(st.integers(), st.integers())
+def test_normalize(x, y):
+    assume(x != 0)
+    assume(y != 0)
+
+    a = VectorNumpy(x, y)
     a.normalize()
 
-    assert a.norm == 1
+    assert abs(a.norm - 1) < eps
 
 
-def test_zero():
-    a = VectorNumpy(1, 1)
+@given(st.integers(), st.integers())
+def test_zero(x, y):
+    a = VectorNumpy(x, y)
     a.zero()
 
     assert a.x == 0
     assert a.y == 0
 
 
-def test_set_mag():
-    a = VectorNumpy(3, 4)
-    a.set_mag(2)
-    assert a.norm == 2
-    a.set_mag(5)
-    assert a.norm == 5
-    a.set_mag(1)
-    assert a.norm == 1
+# TODO extract the max_value magic number
+@given(st.integers(), st.integers(), st.lists(st.integers(min_value=1, max_value=37405339)))
+def test_set_mag(x, y, mags):
+    assume(x != 0)
+    assume(y != 0)
+    assume(mags)
+
+    a = VectorNumpy(x, y)
+
+    for mag in mags:
+        a.set_mag(mag)
+        assert abs(a.norm - abs(mag)) < eps
 
 
-def test_limit():
-    a = VectorNumpy(3, 4)
-    assert a.norm == 5
+# TODO extract the max_value magic number
+@given(st.integers(), st.integers(), st.lists(st.integers(min_value=0, max_value=37405339).filter(lambda x: x != 0)))
+def test_limit(x, y, limits):
+    assume(x != 0)
+    assume(y != 0)
+    assume(limits)
 
-    a.limit(10)
-    assert a.norm == 5
+    a = VectorNumpy(x, y)
 
-    a.limit(3)
-    assert a.norm == 3
-
-    a.limit(1)
-    assert a.norm == 1
-
-
-def test_from_angle():
-    a = VectorNumpy().from_angle(0)
-    assert abs(a.x - 1) < 1e-10
-    assert abs(a.y - 0) < 1e-10
-
-    a = VectorNumpy().from_angle(pi / 2)
-    assert abs(a.x - 0) < 1e-10
-    assert abs(a.y - 1) < 1e-10
-
-    a = VectorNumpy().from_angle(pi)
-    assert abs(a.x - -1) < 1e-10
-    assert abs(a.y - 0) < 1e-10
+    for limit in limits:
+        a.limit(limit)
+        assert abs(a.norm - abs(limit)) < eps or a.norm < abs(limit)
 
 
-def test_set():
-    a = VectorNumpy(1, 2)
-    b = VectorNumpy(5, 4)
+@given(st.lists(st.integers(), min_size=4, max_size=4))
+def test_set(values):
+    x1, x2, y1, y2 = values
+
+    a = VectorNumpy(x1, y1)
+    b = VectorNumpy(x2, y2)
     a.set(b)
 
     assert a.x == b.x
     assert a.y == b.y
 
-
-def test_dist():
-    a = VectorNumpy(1, 1)
-    b = VectorNumpy(1, 2)
-
-    assert a.dist(b) == 1
-    assert b.dist(a) == 1
-
-    a = VectorNumpy(2, 3)
-    b = VectorNumpy(5, 7)
-
-    assert a.dist(b) == 5
-    assert b.dist(a) == 5
+    assert a.x == x2
+    assert a.y == y2
 
 
-def test_heading():
-    a = VectorNumpy(1, 0)
-    assert a.heading == 0
+@given(x1=st.integers(), y1=st.integers(), x2=st.integers(), y2=st.integers())
+def test_dist(x1, y1, x2, y2):
+    a = VectorNumpy(x1, y1)
+    b = VectorNumpy(x2, y2)
 
-    a = VectorNumpy(0, 1)
-    assert abs(a.heading - pi / 2) < 1e-10
+    assert a.dist(b) == distance(x1, x2, y1, y2)
+    assert b.dist(a) == distance(x1, x2, y1, y2)
 
-    a = VectorNumpy(-1, 0)
-    assert abs(a.heading - pi) < 1e-10
+
+@given(st.floats(min_value=-pi, max_value=pi, allow_nan=False, allow_infinity=None))
+def test_from_angle(angle):
+    a = VectorNumpy().from_angle(angle)
+
+    assert abs(a.heading - angle) < eps
+
+
+@given(st.integers(max_value=1e6), st.integers(max_value=1e6), st.integers(min_value=1, max_value=1e6))
+def test_heading(x, y, length):
+    a = VectorNumpy(x, y)
+
+    assert math.atan2(a.y, a.x) == a.heading
+    assert -math.pi <= a.heading <= math.pi
+
+    a.set_mag(length)
+    b = VectorNumpy().from_angle(a.heading, length=a.norm)
+
+    assert abs(a.x - b.x) < eps
+    assert abs(a.y - b.y) < eps
+
+
+@given(st.integers())
+def test_random(_):
+    a = VectorNumpy().random()
+
+    assert -1 <= a.x <= 1
+    assert -1 <= a.y <= 1
+
+
+# Utils
+
+def distance(x1, x2, y1, y2):
+    squared_differences = (x1 - x2)**2 + (y1 - y2)**2
+    return math.sqrt(squared_differences)
