@@ -8,3 +8,4 @@ To make things even more fun I am going to experiment with several implementatio
 ## What I learned
 
 1. Float arithmetic with fixed number of bits is weird.
+2. Property based tests finds edge cases that you would (probably) never think of
