@@ -44,7 +44,6 @@ def test_sub(x1, y1, x2, y2):
     assert b.y == y2
 
 
-# TODO
 @given(x1=st.integers(), y1=st.integers(), x2=st.integers(), y2=st.integers())
 def test_iadd(x1, y1, x2, y2):
     a = Vector(x1, y1)
@@ -56,13 +55,18 @@ def test_iadd(x1, y1, x2, y2):
     assert a.x == c.x + b.x
     assert a.y == c.y + b.y
 
+    if x1 != 0 and x2 != 0:
+        assert a.x != x2
+
+    if y1 != 0 and y2 != 0:
+        assert a.y != y2
+
     a += Vector(1, 1)
 
-    # assert a.x > c.x
-    # assert a.y > c.x
+    assert a.x == c.x + b.x + 1
+    assert a.y == c.y + b.y + 1
 
 
-# TODO
 @given(x1=st.integers(), y1=st.integers(), x2=st.integers(), y2=st.integers())
 def test_isub(x1, y1, x2, y2):
     a = Vector(x1, y1)
@@ -74,10 +78,16 @@ def test_isub(x1, y1, x2, y2):
     assert a.x == c.x - b.x
     assert a.y == c.y - b.y
 
-    # a -= Vector(1, 1)
+    if x1 != 0 and x2 != 0:
+        assert a.x != x2
 
-    # assert a.x < c.x
-    # assert a.y < c.x
+    if y1 != 0 and y2 != 0:
+        assert a.y != y2
+
+    a -= Vector(1, 1)
+
+    assert a.x == c.x - b.x - 1
+    assert a.y == c.y - b.y - 1
 
 
 @given(st.integers(), st.integers())
@@ -113,13 +123,13 @@ def test_mul(x, y, z):
     assert a.y == y * z
 
 
-# TODO
-def test_imul():
-    a = Vector(1, 1)
-    a *= 10
+@given(st.integers(), st.integers(), st.integers())
+def test_imul(x, y, z):
+    a = Vector(x, y)
+    a *= z
 
-    assert a.x == 10
-    assert a.y == 10
+    assert a.x == x * z
+    assert a.y == y * z
 
 
 @given(st.integers(), st.integers())
@@ -150,7 +160,7 @@ def test_zero(x, y):
     assert a.y == 0
 
 
-@settings(max_examples=200)
+# TODO extract the max_value magic number
 @given(st.integers(), st.integers(), st.lists(st.integers(min_value=1, max_value=37405339)))
 def test_set_mag(x, y, mags):
     assume(x != 0)
@@ -164,7 +174,7 @@ def test_set_mag(x, y, mags):
         assert abs(a.norm - abs(mag)) < eps
 
 
-@settings(max_examples=200)
+# TODO extract the max_value magic number
 @given(st.integers(), st.integers(), st.lists(st.integers(min_value=0, max_value=37405339).filter(lambda x: x != 0)))
 def test_limit(x, y, limits):
     assume(x != 0)
