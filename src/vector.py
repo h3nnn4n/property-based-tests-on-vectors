@@ -49,8 +49,10 @@ class Vector:
 
     def normalize(self):
         norm = self.norm
-        self.x /= norm
-        self.y /= norm
+
+        if norm != 0:
+            self.x /= norm
+            self.y /= norm
 
         return self
 

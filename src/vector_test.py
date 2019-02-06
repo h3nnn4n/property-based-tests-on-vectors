@@ -151,7 +151,7 @@ def test_zero(x, y):
 
 
 @settings(max_examples=200)
-@given(st.integers(), st.integers(), st.lists(st.integers(min_value=1, max_value=50331648)))
+@given(st.integers(), st.integers(), st.lists(st.integers(min_value=1, max_value=37405339)))
 def test_set_mag(x, y, mags):
     assume(x != 0)
     assume(y != 0)
@@ -165,7 +165,7 @@ def test_set_mag(x, y, mags):
 
 
 @settings(max_examples=200)
-@given(st.integers(), st.integers(), st.lists(st.integers(min_value=0, max_value=50331648).filter(lambda x: x != 0)))
+@given(st.integers(), st.integers(), st.lists(st.integers(min_value=0, max_value=37405339).filter(lambda x: x != 0)))
 def test_limit(x, y, limits):
     assume(x != 0)
     assume(y != 0)
@@ -178,49 +178,53 @@ def test_limit(x, y, limits):
         assert abs(a.norm - abs(limit)) < eps or a.norm < abs(limit)
 
 
-def test_from_angle():
-    a = Vector().from_angle(0)
-    assert abs(a.x - 1) < 1e-10
-    assert abs(a.y - 0) < 1e-10
+@given(st.lists(st.integers(), min_size=4, max_size=4))
+def test_set(values):
+    x1, x2, y1, y2 = values
 
-    a = Vector().from_angle(pi / 2)
-    assert abs(a.x - 0) < 1e-10
-    assert abs(a.y - 1) < 1e-10
-
-    a = Vector().from_angle(pi)
-    assert abs(a.x - -1) < 1e-10
-    assert abs(a.y - 0) < 1e-10
-
-
-def test_set():
-    a = Vector(1, 2)
-    b = Vector(5, 4)
+    a = Vector(x1, y1)
+    b = Vector(x2, y2)
     a.set(b)
 
     assert a.x == b.x
     assert a.y == b.y
 
-
-def test_dist():
-    a = Vector(1, 1)
-    b = Vector(1, 2)
-
-    assert a.dist(b) == 1
-    assert b.dist(a) == 1
-
-    a = Vector(2, 3)
-    b = Vector(5, 7)
-
-    assert a.dist(b) == 5
-    assert b.dist(a) == 5
+    assert a.x == x2
+    assert a.y == y2
 
 
-def test_heading():
-    a = Vector(1, 0)
-    assert a.heading == 0
+@given(x1=st.integers(), y1=st.integers(), x2=st.integers(), y2=st.integers())
+def test_dist(x1, y1, x2, y2):
+    a = Vector(x1, y1)
+    b = Vector(x2, y2)
 
-    a = Vector(0, 1)
-    assert abs(a.heading - pi / 2) < 1e-10
+    assert a.dist(b) == distance(x1, x2, y1, y2)
+    assert b.dist(a) == distance(x1, x2, y1, y2)
 
-    a = Vector(-1, 0)
-    assert abs(a.heading - pi) < 1e-10
+
+@given(st.floats(min_value=-pi, max_value=pi, allow_nan=False, allow_infinity=None))
+def test_from_angle(angle):
+    a = Vector().from_angle(angle)
+
+    assert abs(a.heading - angle) < eps
+
+
+@given(st.integers(max_value=1e6), st.integers(max_value=1e6), st.integers(min_value=1, max_value=1e6))
+def test_heading(x, y, length):
+    a = Vector(x, y)
+
+    assert math.atan2(a.y, a.x) == a.heading
+    assert -math.pi <= a.heading <= math.pi
+
+    a.set_mag(length)
+    b = Vector().from_angle(a.heading, length=a.norm)
+
+    assert abs(a.x - b.x) < eps
+    assert abs(a.y - b.y) < eps
+
+
+# Utils
+
+def distance(x1, x2, y1, y2):
+    squared_differences = (x1 - x2)**2 + (y1 - y2)**2
+    return math.sqrt(squared_differences)

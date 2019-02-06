@@ -7,4 +7,4 @@ To make things even more fun I am going to experiment with several implementatio
 
 ## What I learned
 
-1. TODO
+1. Float arithmetic with fixed number of bits is weird.
