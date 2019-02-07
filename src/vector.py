@@ -1,5 +1,4 @@
-import numpy as np
-from math import cos, sin, pi, atan2, sqrt
+from math import cos, sin, atan2, sqrt
 from random import uniform
 
 
@@ -21,24 +20,24 @@ class Vector:
         return self._y
 
     def __add__(self, other):
-        return Vector(self.x + other.x, self.y + other.y)
+        return type(self)(self.x + other.x, self.y + other.y)
 
     def __iadd__(self, other):
-        self = Vector(self.x + other.x, self.y + other.y)
+        self = type(self)(self.x + other.x, self.y + other.y)
         return self
 
     def __sub__(self, other):
-        return Vector(self.x - other.x, self.y - other.y)
+        return type(self)(self.x - other.x, self.y - other.y)
 
     def __isub__(self, other):
-        self = Vector(self.x - other.x, self.y - other.y)
+        self = type(self)(self.x - other.x, self.y - other.y)
         return self
 
     def __mul__(self, other):
-        return Vector(self.x * other, self.y * other)
+        return type(self)(self.x * other, self.y * other)
 
     def __imul__(self, other):
-        self = Vector(self.x * other, self.y * other)
+        self = type(self)(self.x * other, self.y * other)
         return self
 
     def __str__(self):
@@ -111,7 +110,7 @@ class Vector:
         return self
 
     def copy(self):
-        return Vector().set(self)
+        return type(self)().set(self)
 
     x = property(get_x, set_x)
     y = property(get_y, set_y)
