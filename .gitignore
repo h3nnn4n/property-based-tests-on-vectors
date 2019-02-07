@@ -2,3 +2,6 @@ __pycache__
 .hypothesis
 .coverage
 htmlcov
+.vscode
+*.o
+*.dylib
