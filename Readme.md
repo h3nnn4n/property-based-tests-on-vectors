@@ -13,3 +13,4 @@ This repository uses [pipenv](https://pipenv.readthedocs.io). Just run `pipenv i
 
 1. Float arithmetic with fixed number of bits is weird.
 2. Property based tests finds edge cases that you would (probably) never think of
+3. Converting `int` to `float` can cause some unexpected errors (i.e. a number that can fit in an `int` but not a `float`)
