@@ -12,6 +12,7 @@ coverage = "*"
 pytest-cov = "*"
 pytest-xdist = "*"
 ipython = "*"
+"flake8" = "*"
 
 [dev-packages]
 "flake8" = "*"
