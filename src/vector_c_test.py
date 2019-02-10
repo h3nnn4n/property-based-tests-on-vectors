@@ -5,6 +5,10 @@ import math
 import hypothesis.strategies as st
 
 
+# The whole way this is tests seems a little weird for me :thinking:
+# I dont quite like the ideia of limiting the size of the input
+
+
 eps = 1e-8
 
 

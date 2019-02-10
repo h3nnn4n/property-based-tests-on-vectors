@@ -1,6 +1,5 @@
 from vector import Vector
 from ctypes import cdll, Structure, c_double, POINTER
-from dpcontracts import ensure, require
 
 
 class CVector(Structure):
