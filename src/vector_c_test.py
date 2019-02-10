@@ -8,8 +8,10 @@ import hypothesis.strategies as st
 eps = 1e-8
 
 
-def integer_on_c_safe_range():
-    safe_range = 2**31 - 1
+def integer_on_c_safe_range(safe_range=None):
+    if safe_range is None:
+        safe_range = 2**28 - 1
+
     return st.integers(min_value=-safe_range, max_value=safe_range)
 
 
@@ -94,10 +96,10 @@ def test_isub(x1, y1, x2, y2):
     assert a.y == c.y - b.y
 
     if x1 != 0 and x2 != 0:
-        assert a.x != x2
+        assert a.x != c.x
 
     if y1 != 0 and y2 != 0:
-        assert a.y != y2
+        assert a.y != c.y
 
     a -= Vector_C(1, 1)
 
@@ -142,8 +144,9 @@ def test_init(x, y):
     assert a.y == y
 
 
-@given(integer_on_c_safe_range(), integer_on_c_safe_range(),
-       integer_on_c_safe_range())
+@given(integer_on_c_safe_range(safe_range=2**15-1),
+       integer_on_c_safe_range(safe_range=2**15-1),
+       integer_on_c_safe_range(safe_range=2**15-1))
 def test_mul(x, y, z):
     a = Vector_C(x, y)
     b = a * z
@@ -152,8 +155,9 @@ def test_mul(x, y, z):
     assert b.y == y * z
 
 
-@given(integer_on_c_safe_range(), integer_on_c_safe_range(),
-       integer_on_c_safe_range())
+@given(integer_on_c_safe_range(safe_range=2**15-1),
+       integer_on_c_safe_range(safe_range=2**15-1),
+       integer_on_c_safe_range(safe_range=2**15-1))
 def test_imul(x, y, z):
     a = Vector_C(x, y)
     a *= z
@@ -190,12 +194,13 @@ def test_zero(x, y):
     assert a.y == 0
 
 
-# TODO extract the max_value magic number
-@given(integer_on_c_safe_range(), integer_on_c_safe_range(), st.lists(st.integers(min_value=1, max_value=37405339)))
+@given(integer_on_c_safe_range(), integer_on_c_safe_range(),
+       st.lists(integer_on_c_safe_range(safe_range=2**25-1)))
 def test_set_mag(x, y, mags):
     assume(x != 0)
     assume(y != 0)
     assume(mags)
+    assume(0 not in mags)
 
     a = Vector_C(x, y)
 
@@ -204,8 +209,9 @@ def test_set_mag(x, y, mags):
         assert abs(a.norm - abs(mag)) < eps
 
 
-# TODO extract the max_value magic number
-@given(integer_on_c_safe_range(), integer_on_c_safe_range(), st.lists(st.integers(min_value=0, max_value=37405339).filter(lambda x: x != 0)))
+@given(integer_on_c_safe_range(), integer_on_c_safe_range(),
+       st.lists(integer_on_c_safe_range(safe_range=2**26-1)
+       .filter(lambda x: x != 0)))
 def test_limit(x, y, limits):
     assume(x != 0)
     assume(y != 0)
