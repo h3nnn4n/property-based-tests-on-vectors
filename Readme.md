@@ -14,5 +14,6 @@ This repository uses [pipenv](https://pipenv.readthedocs.io). Just run `pipenv i
 1. Float arithmetic with fixed number of bits is weird.
 2. Property based tests finds edge cases that you would (probably) never think of
 3. Converting `int` to `float` can cause some unexpected errors (i.e. a number that can fit in an `int` but not a `float`)
-4. Interfacing with objects in C makes it very hard to ensure that arithmetic works as expected. When passing numbers around it is very easy to lose precision when dealing with "big" numbers like 2**31. YMMV depending on archteture I guess. I am pretty much limiting the range of numbers that can be passed to C in order to avoid losing some bits around.
+4. Interfacing with objects in C makes it very hard to ensure that arithmetic works as expected. When passing numbers around it is very easy to lose precision when dealing with "big" numbers like 2^31. YMMV depending on archteture I guess. I am pretty much limiting the range of numbers that can be passed to C in order to avoid losing some bits around.
+5. Achieving 100% test coverage with property based tests can be pretty brutal. Lots of edge cases to cover, some of which may be out of the intended use cases.
 
