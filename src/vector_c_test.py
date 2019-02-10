@@ -195,7 +195,7 @@ def test_zero(x, y):
 
 
 @given(integer_on_c_safe_range(), integer_on_c_safe_range(),
-       st.lists(integer_on_c_safe_range(safe_range=2**25-1)))
+       st.lists(integer_on_c_safe_range(safe_range=2**15-1)))
 def test_set_mag(x, y, mags):
     assume(x != 0)
     assume(y != 0)
@@ -210,7 +210,7 @@ def test_set_mag(x, y, mags):
 
 
 @given(integer_on_c_safe_range(), integer_on_c_safe_range(),
-       st.lists(integer_on_c_safe_range(safe_range=2**26-1)
+       st.lists(integer_on_c_safe_range(safe_range=2**15-1)
        .filter(lambda x: x != 0)))
 def test_limit(x, y, limits):
     assume(x != 0)
@@ -262,7 +262,8 @@ def test_from_angle(angle):
     assert abs(a.heading - angle) < eps
 
 
-@given(integer_on_c_safe_range(), integer_on_c_safe_range(),
+@given(integer_on_c_safe_range(safe_range=2**15-1),
+       integer_on_c_safe_range(safe_range=2**15-1),
        st.integers(min_value=1, max_value=1e6))
 def test_heading(x, y, length):
     a = Vector_C(x, y)

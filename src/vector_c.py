@@ -54,22 +54,14 @@ class Vector_C(Vector):
     def get_y(self):
         return self.get_y_(self.c_vector_pointer)
 
-    @require("x must be -2**31-1 <= y <= 2**31-1",
-             lambda args: vector_in_valid_range_for_c_double(args.other))
-    @ensure("return must be -2**31-1 <= y <= 2**31-1",
-            lambda _, ret: vector_in_valid_range_for_c_double(ret))
-    def __add__(self, other):
-        return super().__add__(other)
-
     x = property(get_x, set_x)
     y = property(get_y, set_y)
 
 
-def vector_in_valid_range_for_c_double(vector):
-    return in_valid_range_for_c_double(vector.x) and \
+def vector_in_valid_range_for_c_double(vector, safe_range=2**31-1):
+    return in_valid_range_for_c_double(vector.x, safe_range=safe_range) and \
         in_valid_range_for_c_double(vector.y)
 
 
-def in_valid_range_for_c_double(number):
-    safe_range = 2**31 - 1
+def in_valid_range_for_c_double(number, safe_range=2**31-1):
     return -safe_range <= number <= safe_range
